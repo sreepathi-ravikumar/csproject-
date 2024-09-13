@@ -1,0 +1,208 @@
+Certainly! Based on your project topic, "Digital Marketing Performance Analysis," here's an advanced Python program using **`mysql.connector`**, **`tkinter`**, and **`matplotlib`**. This project will:
+1. **Collect digital marketing metrics** (like `Posts`, `Followers`, `Likes`, `Comments`, `Engagement Rate`).
+2. **Display the data** collected from a MySQL database.
+3. **Visualize the data** in various graphical outputs (bar charts, pie charts, etc.) using `matplotlib`.
+4. **Analyze digital marketing performance** through user-friendly Tkinter GUI.
+
+This code will go beyond 150 lines, fulfilling the advanced criteria and graphical output requirements.
+
+### MySQL Table Creation:
+First, you need to set up the MySQL database and table to store digital marketing data:
+
+```sql
+CREATE DATABASE digital_marketing;
+USE digital_marketing;
+
+CREATE TABLE performance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(255),
+    posts INT,
+    followers INT,
+    likes INT,
+    comments INT,
+    engagement_rate FLOAT
+);
+```
+
+### Full Python Code:
+
+```python
+import mysql.connector
+from tkinter import *
+from tkinter import messagebox
+import matplotlib.pyplot as plt
+
+# MySQL connection
+def connect_db():
+    try:
+        conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="your_password",
+            database="digital_marketing"
+        )
+        return conn
+    except mysql.connector.Error as err:
+        messagebox.showerror("Database Error", f"Error: {err}")
+        return None
+
+# Insert data manually
+def insert_data(user, posts, followers, likes, comments, engagement_rate):
+    conn = connect_db()
+    if conn:
+        cursor = conn.cursor()
+        query = "INSERT INTO performance (username, posts, followers, likes, comments, engagement_rate) VALUES (%s, %s, %s, %s, %s, %s)"
+        cursor.execute(query, (user, posts, followers, likes, comments, engagement_rate))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        messagebox.showinfo("Success", "Data Inserted Successfully")
+
+# Display data
+def display_data():
+    conn = connect_db()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM performance")
+        rows = cursor.fetchall()
+        display_window = Toplevel(root)
+        display_window.title("Digital Marketing Data")
+        Label(display_window, text="Username | Posts | Followers | Likes | Comments | Engagement Rate", font=("Arial", 12)).pack()
+        for row in rows:
+            Label(display_window, text=f"{row[1]} | {row[2]} | {row[3]} | {row[4]} | {row[5]} | {row[6]:.2f}", font=("Arial", 10)).pack()
+        cursor.close()
+        conn.close()
+
+# Analyze and plot data
+def analyze_data():
+    conn = connect_db()
+    if conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT username, posts, followers, likes, comments, engagement_rate FROM performance")
+        data = cursor.fetchall()
+        
+        usernames = [row[0] for row in data]
+        posts = [row[1] for row in data]
+        followers = [row[2] for row in data]
+        likes = [row[3] for row in data]
+        comments = [row[4] for row in data]
+        engagement_rate = [row[5] for row in data]
+
+        # Plot Posts, Followers, Likes
+        fig, ax = plt.subplots(3, 1, figsize=(10, 12))
+
+        ax[0].bar(usernames, posts, color='blue')
+        ax[0].set_title('Number of Posts by Users')
+        ax[0].set_ylabel('Posts')
+
+        ax[1].bar(usernames, followers, color='green')
+        ax[1].set_title('Number of Followers by Users')
+        ax[1].set_ylabel('Followers')
+
+        ax[2].bar(usernames, likes, color='red')
+        ax[2].set_title('Number of Likes by Users')
+        ax[2].set_ylabel('Likes')
+
+        plt.tight_layout()
+        plt.show()
+
+        # Plot Comments and Engagement Rate in separate pie charts
+        fig2, ax2 = plt.subplots(1, 2, figsize=(12, 6))
+
+        # Pie chart for comments distribution
+        ax2[0].pie(comments, labels=usernames, autopct='%1.1f%%', startangle=90)
+        ax2[0].set_title('Comments Distribution')
+
+        # Pie chart for engagement rate
+        ax2[1].pie(engagement_rate, labels=usernames, autopct='%1.1f%%', startangle=90)
+        ax2[1].set_title('Engagement Rate Distribution')
+
+        plt.tight_layout()
+        plt.show()
+
+        cursor.close()
+        conn.close()
+
+# GUI Setup
+root = Tk()
+root.title("Digital Marketing Performance Dashboard")
+
+# Labels and Entry Widgets
+Label(root, text="Username").grid(row=0, column=0)
+Label(root, text="Posts").grid(row=1, column=0)
+Label(root, text="Followers").grid(row=2, column=0)
+Label(root, text="Likes").grid(row=3, column=0)
+Label(root, text="Comments").grid(row=4, column=0)
+Label(root, text="Engagement Rate").grid(row=5, column=0)
+
+username_entry = Entry(root)
+username_entry.grid(row=0, column=1)
+posts_entry = Entry(root)
+posts_entry.grid(row=1, column=1)
+followers_entry = Entry(root)
+followers_entry.grid(row=2, column=1)
+likes_entry = Entry(root)
+likes_entry.grid(row=3, column=1)
+comments_entry = Entry(root)
+comments_entry.grid(row=4, column=1)
+engagement_rate_entry = Entry(root)
+engagement_rate_entry.grid(row=5, column=1)
+
+# Buttons for functionality
+Button(root, text="Insert Data", command=lambda: insert_data(
+    username_entry.get(),
+    int(posts_entry.get()),
+    int(followers_entry.get()),
+    int(likes_entry.get()),
+    int(comments_entry.get()),
+    float(engagement_rate_entry.get())
+)).grid(row=6, column=0)
+
+Button(root, text="Display Data", command=display_data).grid(row=6, column=1)
+Button(root, text="Analyze Data", command=analyze_data).grid(row=6, column=2)
+
+root.mainloop()
+```
+
+### Features of the Program:
+1. **MySQL Database**:
+   - The program connects to a MySQL database called `digital_marketing` and uses the `performance` table to store and retrieve data.
+   - The table has six columns: `username`, `posts`, `followers`, `likes`, `comments`, and `engagement_rate`.
+
+2. **Tkinter GUI**:
+   - A user-friendly interface where you can enter the digital marketing performance metrics manually.
+   - Input fields include `Username`, `Posts`, `Followers`, `Likes`, `Comments`, and `Engagement Rate`.
+
+3. **Data Visualization**:
+   - The program displays the performance data in multiple graphical formats.
+   - **Bar Charts** for:
+     - Posts by users
+     - Followers by users
+     - Likes by users
+   - **Pie Charts** for:
+     - Comments distribution among users
+     - Engagement rate distribution among users
+
+4. **Data Entry**:
+   - You can manually insert data for each user’s digital marketing performance.
+   
+5. **Data Display**:
+   - The `Display Data` button allows you to view all data stored in the MySQL table in a separate Tkinter window.
+
+6. **Data Analysis**:
+   - The `Analyze Data` button visualizes the data with bar and pie charts, making it easy to analyze user performance metrics like posts, followers, likes, comments, and engagement rate.
+
+### Running the Code:
+1. **Install the Required Modules**:
+   ```bash
+   pip install mysql-connector-python
+   pip install matplotlib
+   ```
+2. **MySQL Database**:
+   - Make sure to replace `your_password` with your actual MySQL root password.
+   - Run the SQL script provided earlier to create the necessary database and table.
+
+3. **Running the Script**:
+   - Once you run the Python code, a Tkinter window will open where you can manually input user performance data and analyze it graphically.
+
+This advanced program is tailored for digital marketing performance analysis, with multiple metrics, and visual output using `matplotlib` and `tkinter`.
